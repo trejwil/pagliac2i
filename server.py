@@ -7,14 +7,14 @@ def banner():
 
 def comm_in(targ_id):
     print("[+] Awaiting response...")
-    response = remote_target.recv(1024).decode()
+    response = targ_id.recv(1024).decode()
     return response
 
 def comm_out(targ_id, message):
     message = str(message)
-    remote_target.send(message.encode())
+    targ_id.send(message.encode())
 
-def target_comm():
+def target_comm(targ_id):
     while True:
         message = input("@> ")
         comm_out(targ_id, message)
