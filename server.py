@@ -104,13 +104,13 @@ def exeplant():
         f.write(new_port)
         f.close()
 
-        pyinstaller_exec = f"pyinstaller {file_name} -w --clean --onefile --distpath ."
+        pyinstaller_exec = ["pyinstaller", file_name, "-w", "--clean", "--onefile", "--distpath",  "."]
         print(f"[+] Compiling executable {exe_file}...")
         subprocess.call(pyinstaller_exec, stderr=subprocess.DEVNULL)
         os.remove(f"{ran_name}.spec")
         shutil.rmtree("build")
 
-        if os.path.exists(f"{check_cwd}/{exe_file}"):
+        if os.path.exists(f"{check_cwd}/{exe_file}") or os.path.exists(f"{check_cwd}/{ran_name}"):
             print(f"[+] {exe_file} saved to current directory.")
         
         else:
