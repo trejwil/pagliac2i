@@ -57,7 +57,10 @@ def session_handler():
             except FileNotFoundError:
                 outbound("[-] File or directory does not exist.")
                 continue
-        
+                
+        elif message == "help":
+            pass
+
         elif message == "background":
             pass
 
