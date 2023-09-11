@@ -147,7 +147,7 @@ def comm_out(targ_id, message):
     message = base64.b64encode(bytes(message, encoding="utf8"))
     targ_id.send(message)
 
-def target_comm(targ_id):
+def target_comm(targ_id, targets, num):
     while True:
         message = input(f"{targets[num][3]}/{targets[num][1]}@> ")
         comm_out(targ_id, message)
