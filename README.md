@@ -1,4 +1,4 @@
 # pagliac2i
 A silly little C2 framework
 
-Functional, but not yet complete. Will be rewritten in the future.
+Currently in the process of rewriting in Rust.
